@@ -89,21 +89,21 @@ REPORTS
  
 VitalSync runs a **background monitor** on its own thread, independently of user input, so the system exhibits genuine concurrent behaviour rather than only appearing to.
  
-**What the monitor does.** On a periodic loop, the monitor thread wakes, inspects the shared clinic state through the `IMonitorable` contract (rooms and practitioners), and checks for conditions that warrant attention — for example a room pushed to capacity or a patient who has waited beyond a threshold. When it finds one, it raises the relevant event (see below). All of this happens while the main thread continues to serve the operator's menu, so the interface never blocks.
+**What the monitor does.** On a periodic loop, the monitor thread wakes, inspects the shared clinic state through the `IMonitorable` contract (rooms and practitioners), and checks for conditions that warrant attention for example a room pushed to capacity or a patient who has waited beyond a threshold. When it finds one, it raises the relevant event. All of this happens while the main thread continues to serve the operator's menu, so the interface never blocks.
  
-**Why threading is necessary here.** A clinic must be watched continuously; the watching cannot pause every time the operator is reading the menu or typing a command. The monitor therefore has to run on its own thread. This is why the "Background monitor: RUNNING" line appears at the top of the menu — it is a visible signal that the second thread is alive.
+**Why threading is necessary here.** A clinic must be watched continuously; the watching cannot pause every time the operator is reading the menu or typing a command. The monitor therefore has to run on its own thread. This is why the "Background monitor: RUNNING" line appears at the top of the menu it is a visible signal that the second thread is alive.
  
-**Safe execution.** The background thread and the main thread both read and modify shared collections (patients, rooms, appointments). Access to that shared state is synchronised so the two threads never corrupt it and the program never freezes or crashes. _(Document the exact synchronisation mechanism used here once implemented — e.g. `lock` around shared-collection access.)_
+**Safe execution.** The background thread and the main thread both read and modify shared collections (patients, rooms, appointments). Access to that shared state is synchronised so the two threads never corrupt it and the program never freezes or crashes.
 
 ### Events and Delegates
  
 VitalSync uses custom **events**, delivered through delegates, to represent meaningful changes in the system's state. Events establish a clear publisher–subscriber relationship: the code that detects a change raises an event without needing to know who is listening, and subscribers react automatically.
  
 Planned events:
-- **AppointmentBooked** — raised when a booking succeeds, so the outcome can be logged and reported.
-- **PatientOverdue** — raised by the monitor when a patient has waited beyond the safe threshold.
-- **RoomAtCapacity** — raised when a room reaches its capacity limit, so the operator is warned immediately.
-Because these events are decoupled from the code that triggers them, the part of the system that detects a problem does not call the subscribers directly — it simply raises the event, and any interested part of the system responds. _(Record the exact delegate/event signatures here once implemented.
+- **AppointmentBooked** : raised when a booking succeeds, so the outcome can be logged and reported.
+- **PatientOverdue** : raised by the monitor when a patient has waited beyond the safe threshold.
+- **RoomAtCapacity** : raised when a room reaches its capacity limit, so the operator is warned immediately.
+Because these events are decoupled from the code that triggers them, the part of the system that detects a problem does not call the subscribers directly  it simply raises the event, and any interested part of the system responds.
  
 ## 8. Exception Handling
  
